@@ -42,7 +42,7 @@ def get_endpoint(endpoint, params=None):
 def parse_countries(countries, sort_key, ascending=True):
     table = pd.DataFrame.from_dict(countries)
     table.drop(columns=["CountryCode", "Date", "Slug"], inplace=True)
-    cols = [table.columns[idx] for idx in [0, 4, 1, 5, 2, 6, 3]]
+    cols = config.TABLE_COLUMNS
     table = table[cols]
     return table.sort_values(sort_key, ascending=ascending)
 
