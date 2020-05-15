@@ -88,11 +88,13 @@ class CovidBot(object):
         )
         self.bot.send_message(chat_id=self.chat_id, text=message, parse_mode=parse_mode)
 
-    def send_photo(self, fname):
+    def send_photo(self, fname, timeout=60):
         self.bot.send_chat_action(
             chat_id=self.chat_id, action=telegram.ChatAction.UPLOAD_PHOTO
         )
-        self.bot.send_photo(chat_id=self.chat_id, photo=open(fname, "rb"))
+        self.bot.send_photo(
+            chat_id=self.chat_id, photo=open(fname, "rb"), timeout=timeout
+        )
 
     def send_photos(self, fnames, timeout=60):
         photos = [telegram.InputMediaPhoto(open(fname, "rb")) for fname in fnames]
@@ -107,7 +109,6 @@ def main():
 
     ref_date = datetime.strptime(data["Date"], config.REF_FORMAT)
     target_date = convert_timezone(ref_date, config.REF_TZ, config.TARGET_TZ)
-
     table = parse_countries(data["Countries"], "TotalConfirmed", ascending=False)
     tables = split_table(table, size=config.TABLE_ROWS)
 
@@ -120,10 +121,12 @@ def main():
 
     bot = CovidBot(chat_id=config.CHAT_ID, token=config.BOT_TOKEN)
     bot.send_message(
-        f"COVID-19 summary statistics as of *{target_date.strftime(config.TARGET_TZ)}*",
+        f"COVID-19 summary statistics as of *{target_date.strftime(config.TARGET_FORMAT)}*",
         parse_mode="markdown",
     )
-    bot.send_photos(fnames)
+
+    for fname in fnames:
+        bot.send_photo(fname)
 
 
 if __name__ == "__main__":
