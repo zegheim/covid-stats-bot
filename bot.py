@@ -107,6 +107,12 @@ class CovidBot(object):
 def main():
     data = get_endpoint("/summary").json()
 
+    world = data["Global"]
+    world["Country"] = "Global"
+
+    countries = data["Countries"]
+    countries.append(world)
+
     ref_date = datetime.strptime(data["Date"], config.REF_FORMAT)
     target_date = convert_timezone(ref_date, config.REF_TZ, config.TARGET_TZ)
     table = parse_countries(data["Countries"], "TotalConfirmed", ascending=False)
@@ -124,9 +130,9 @@ def main():
         f"COVID-19 summary statistics as of *{target_date.strftime(config.TARGET_FORMAT)}*",
         parse_mode="markdown",
     )
-
-    for fname in fnames:
-        bot.send_photo(fname)
+    first, *rest = fnames
+    bot.send_photo(first)
+    bot.send_photos(rest, timeout=300)
 
 
 if __name__ == "__main__":
