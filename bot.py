@@ -108,8 +108,8 @@ class CovidBot(object):
                 chat_id=self.chat_id, media=photos, timeout=timeout
             )
         except telegram.error.BadRequest as e:
-            logging.error(e)
-            sys.exit(1)
+            logging.error(f"{e}. Retrying one more time...")
+            self.send_photos(fnames, timeout=timeout)
 
 
 def main():
