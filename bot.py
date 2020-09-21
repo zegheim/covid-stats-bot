@@ -1,15 +1,17 @@
-import config
-import imgkit
 import logging
-import numpy as np
 import os
+import sys
+from datetime import datetime
+
+import numpy as np
 import pandas as pd
 import pytz
 import requests
+
+import config
+import imgkit
 import seaborn as sns
 import telegram
-
-from datetime import datetime
 from requests_toolbelt import sessions
 
 logging.basicConfig(
@@ -101,7 +103,13 @@ class CovidBot(object):
         self.bot.send_chat_action(
             chat_id=self.chat_id, action=telegram.ChatAction.UPLOAD_PHOTO
         )
-        self.bot.send_media_group(chat_id=self.chat_id, media=photos, timeout=timeout)
+        try:
+            self.bot.send_media_group(
+                chat_id=self.chat_id, media=photos, timeout=timeout
+            )
+        except telegram.error.BadRequest as e:
+            logging.error(e)
+            sys.exit(1)
 
 
 def main():
@@ -130,9 +138,11 @@ def main():
         f"COVID-19 summary statistics as of *{target_date.strftime(config.TARGET_FORMAT)}*",
         parse_mode="markdown",
     )
-    first, *rest = fnames
-    bot.send_photo(first)
-    bot.send_photos(rest, timeout=300)
+
+    batch_size = len(fnames) // 2
+    first_batch, second_batch = fnames[:batch_size], fnames[batch_size:]
+    bot.send_photos(first_batch, timeout=300)
+    bot.send_photos(second_batch, timeout=300)
 
 
 if __name__ == "__main__":
