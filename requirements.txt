@@ -10,7 +10,7 @@ decorator==4.4.2
 future==0.18.2
 idna==2.8
 imgkit==1.0.2
-Jinja2==2.11.2
+Jinja2==2.11.3
 kiwisolver==1.2.0
 MarkupSafe==1.1.1
 matplotlib==3.2.1
